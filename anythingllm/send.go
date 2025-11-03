@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -46,7 +47,11 @@ func (a *AnythingLLM) Chat(msg string, reset ...bool) (message string, err error
 	defer resp.Body.Close()
 	//处理状态
 	if resp.StatusCode != 200 {
-		err = fmt.Errorf("未知状态码:%d", resp.StatusCode)
+		var data []byte
+		if data, err = io.ReadAll(resp.Body); err != nil {
+			return
+		}
+		err = fmt.Errorf("错误状态(%d):%s", resp.StatusCode, string(data))
 		return
 	}
 	//处理消息

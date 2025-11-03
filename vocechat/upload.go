@@ -68,7 +68,7 @@ func (b *Bot) Upload(data []byte, filename string) (path string, err error) {
 	defer resp.Body.Close()
 	//处理状态
 	if resp.StatusCode != 200 {
-		err = fmt.Errorf("未知状态码:%d", resp.StatusCode)
+		err = fmt.Errorf("错误状态:%d", resp.StatusCode)
 		return
 	}
 	//处理数据

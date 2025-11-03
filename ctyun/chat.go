@@ -4,8 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 )
@@ -45,23 +45,12 @@ func (d *CTYun) Chat(msg []Messages, reasoner ...bool) (think, messages string, 
 	defer resp.Body.Close()
 	//处理状态
 	if resp.StatusCode != 200 {
-		switch resp.StatusCode {
-		case 400:
-			err = errors.New("参数不正确")
-			return
-		case 401:
-			err = errors.New("认证失败")
-			return
-		case 429:
-			err = errors.New("余额不足")
-			return
-		case 500:
-			err = errors.New("服务异常")
-			return
-		default:
-			err = fmt.Errorf("未知状态码:%d", resp.StatusCode)
+		var data []byte
+		if data, err = io.ReadAll(resp.Body); err != nil {
 			return
 		}
+		err = fmt.Errorf("错误状态(%d):%s", resp.StatusCode, string(data))
+		return
 	}
 	//处理消息
 	contentType := resp.Header.Get("Content-Type")

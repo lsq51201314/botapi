@@ -3,7 +3,6 @@ package vocechat
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -45,11 +44,7 @@ func (b *Bot) prepare(content_type, filename string) (fid string, err error) {
 	defer resp.Body.Close()
 	//处理状态
 	if resp.StatusCode != 200 {
-		if resp.StatusCode == 401 {
-			err = errors.New("无效的凭证")
-			return
-		}
-		err = fmt.Errorf("未知状态码:%d", resp.StatusCode)
+		err = fmt.Errorf("错误状态:%d", resp.StatusCode)
 		return
 	}
 	//处理数据
