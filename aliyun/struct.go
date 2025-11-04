@@ -30,9 +30,7 @@ type ChatStream struct {
 
 type ChatChoices struct {
 	Delta struct {
-		Role             string `json:"role"`
 		Content          string `json:"content"`
-		ReasoningContent string `json:"reasoning_content"`
 	} `json:"delta"`
 	FinishReason string `json:"finish_reason"` //stop, length, content_filter, tool_calls, insufficient_system_resource
 }

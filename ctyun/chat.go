@@ -10,16 +10,13 @@ import (
 	"time"
 )
 
-func (d *CTYun) Chat(msg []Messages, reasoner ...bool) (messages string, err error) {
+func (d *CTYun) Chat(msg []Messages) (messages string, err error) {
 	//构建聊天
 	obj := chat{
 		Model:          d.model,
 		Messages:       msg,
 		Stream:         true,
 		EnableThinking: false,
-	}
-	if len(reasoner) > 0 && reasoner[0] {
-		obj.EnableThinking = true
 	}
 	var buf []byte
 	if buf, err = json.Marshal(&obj); err != nil {
@@ -60,7 +57,6 @@ func (d *CTYun) Chat(msg []Messages, reasoner ...bool) (messages string, err err
 	}
 	scanner := bufio.NewScanner(resp.Body)
 	messages = ""
-	finish := false
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "" || len(line) <= 5 {
@@ -77,24 +73,9 @@ func (d *CTYun) Chat(msg []Messages, reasoner ...bool) (messages string, err err
 		}
 
 		for _, v := range stream.Choices {
-			if v.Delta.Role == "assistant" { //肯定在第一个
-				messages = "<think>"
-				if d.callback != nil {
-					d.callback(stream.ID, "<think>")
-				}
-			}
-			if !finish && v.Delta.Content != "" && v.Delta.ReasoningContent == "" {
-				finish = true
-				messages += "</think>"
-				if d.callback != nil {
-					d.callback(stream.ID, "</think>")
-				}
-			}
-
-			str := v.Delta.Content + v.Delta.ReasoningContent //必定有一个为空，直接相加
-			messages += str
+			messages += v.Delta.Content
 			if d.callback != nil {
-				d.callback(stream.ID, str)
+				d.callback(stream.ID, v.Delta.Content)
 			}
 
 			if v.FinishReason != "" {
