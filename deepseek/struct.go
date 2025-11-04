@@ -29,6 +29,7 @@ type ChatStream struct {
 
 type ChatChoices struct {
 	Delta struct {
+		Role             string `json:"role"`
 		Content          string `json:"content"`
 		ReasoningContent string `json:"reasoning_content"`
 	} `json:"delta"`

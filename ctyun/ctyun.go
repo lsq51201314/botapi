@@ -1,12 +1,11 @@
 package ctyun
 
 type CTYun struct {
-	model            string
-	url              string
-	authorization    string
-	thinkcallback    Callback
-	messagescallback Callback
-	timeout          int64
+	model         string
+	url           string
+	authorization string
+	callback      CallBack
+	timeout       int64
 }
 
 // 新建实例

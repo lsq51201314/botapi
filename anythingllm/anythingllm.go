@@ -2,9 +2,6 @@ package anythingllm
 
 import "fmt"
 
-// 流式回调
-type CallBack func(id string, message string)
-
 type AnythingLLM struct {
 	url           string
 	authorization string
@@ -21,8 +18,4 @@ func New(url, slug string, authorization string, timeout ...int64) *AnythingLLM 
 		obj.timeout = timeout[0]
 	}
 	return &obj
-}
-
-func (a *AnythingLLM) SetCallback(cfunc CallBack) {
-	a.callback = cfunc
 }

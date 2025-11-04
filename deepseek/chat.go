@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (d *DeepSeek) Chat(msg []Messages, reasoner ...bool) (think, messages string, err error) {
+func (d *DeepSeek) Chat(msg []Messages, reasoner ...bool) (messages string, err error) {
 	//构建聊天
 	obj := chat{
 		Model:    "deepseek-chat",
@@ -58,8 +58,8 @@ func (d *DeepSeek) Chat(msg []Messages, reasoner ...bool) (think, messages strin
 		return
 	}
 	scanner := bufio.NewScanner(resp.Body)
-	think = ""
 	messages = ""
+	finish := false
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "" || len(line) <= 5 {
@@ -76,14 +76,26 @@ func (d *DeepSeek) Chat(msg []Messages, reasoner ...bool) (think, messages strin
 		}
 
 		for _, v := range stream.Choices {
-			think += v.Delta.ReasoningContent
-			messages += v.Delta.Content
-			if d.thinkcallback != nil {
-				d.thinkcallback(stream.ID, v.Delta.ReasoningContent)
+			if v.Delta.Role == "assistant" { //肯定在第一个
+				messages = "<think>"
+				if d.callback != nil {
+					d.callback(stream.ID, "<think>")
+				}
 			}
-			if d.messagescallback != nil {
-				d.messagescallback(stream.ID, v.Delta.Content)
+			if !finish && v.Delta.Content != "" && v.Delta.ReasoningContent == "" {
+				finish = true
+				messages += "</think>"
+				if d.callback != nil {
+					d.callback(stream.ID, "</think>")
+				}
 			}
+
+			str := v.Delta.Content + v.Delta.ReasoningContent //必定有一个为空，直接相加
+			messages += str
+			if d.callback != nil {
+				d.callback(stream.ID, str)
+			}
+
 			if v.FinishReason != "" {
 				break
 			}

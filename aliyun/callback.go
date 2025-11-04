@@ -1,12 +1,8 @@
 package aliyun
 
 // 流式回调
-type Callback func(id, text string)
+type CallBack func(id string, message string)
 
-func (a *Aliyun) SetThinkCallback(cfunc Callback) {
-	a.thinkcallback = cfunc
-}
-
-func (a *Aliyun) SetMessagesCallback(cfunc Callback) {
-	a.messagescallback = cfunc
+func (a *Aliyun) SetCallback(cfunc CallBack) {
+	a.callback = cfunc
 }
