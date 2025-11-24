@@ -14,9 +14,13 @@ type upload struct {
 	Path string `json:"path"`
 }
 
-func (b *Bot) Upload(data []byte, filename string) (path string, err error) {
+func (b *Bot) Upload(data []byte, filename string, content_type ...string) (path string, err error) {
+	ct := "application/octet-stream"
+	if len(content_type) > 0 {
+		ct = content_type[0]
+	}
 	var fid string
-	if fid, err = b.prepare("application/octet-stream", filename); err != nil {
+	if fid, err = b.prepare(ct, filename); err != nil {
 		return
 	}
 	var requestBody bytes.Buffer
