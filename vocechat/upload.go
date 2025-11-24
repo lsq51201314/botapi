@@ -5,11 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"mime"
 	"mime/multipart"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -18,30 +15,20 @@ type upload struct {
 }
 
 func (b *Bot) Upload(data []byte, filename string) (path string, err error) {
-	content_type := mime.TypeByExtension(filepath.Ext(filename))
-	if content_type == "" {
-		content_type = "application/octet-stream"
-	}
 	var fid string
-	if fid, err = b.prepare(content_type, filename); err != nil {
+	if fid, err = b.prepare("application/octet-stream", filename); err != nil {
 		return
 	}
-	//准备表单
 	var requestBody bytes.Buffer
 	writer := multipart.NewWriter(&requestBody)
 	if err = writer.WriteField("file_id", fid); err != nil {
 		return
 	}
-	var file *os.File
-	if file, err = os.Open(filename); err != nil {
-		return
-	}
-	defer file.Close()
 	var part io.Writer
-	if part, err = writer.CreateFormFile("chunk_data", filepath.Base(filename)); err != nil {
+	if part, err = writer.CreateFormFile("chunk_data", filename); err != nil {
 		return
 	}
-	if _, err = io.Copy(part, file); err != nil {
+	if _, err = part.Write(data); err != nil {
 		return
 	}
 	if err = writer.WriteField("chunk_is_last", "true"); err != nil {
